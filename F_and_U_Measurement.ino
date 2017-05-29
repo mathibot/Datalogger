@@ -7,17 +7,15 @@
 RTC_PCF8523 rtc;
 
 File myfile;
-File myfile2;
 int analog = 0;
 float voltage = 0;
 float sum = 0.00;
 
 
-int value[6000];   // variable to store the value coming from the sensor
+int value[6500];   // variable to store the value coming from the sensor
 int i=0;
 
 int count = 0;
-String buffer;
 int int_buffer = 0;
 int lastvalue = -1;
 float start;
@@ -53,13 +51,25 @@ void setup() {
 }
 
 void loop() {
+  
   //Voltage Measurment
   sum = 0.00;
-  for (int i = 0; i < 500; i++) {
+  for (int i = 0; i < 1000; i++) {
       analog = analogRead(0);
-      voltage = analog/5.4682609;
+      voltage = analog/5.4844609;
       sum = sum + voltage;
   }
+ 
+  //Frequency Measurement
+  start = micros();
+  for (i=0;i<6500;i++)
+  {
+   value[i]=analogRead(2);
+  }
+  ending = micros(); 
+  delay(500);
+  checkit();
+  delay(500);
 
   //Write down Timestamp
   DateTime now = rtc.now();
@@ -75,23 +85,11 @@ void loop() {
   myfile.print(':');
   myfile.print(now.second(), DEC);
   myfile.print(';');
-    
+  
   //Write down Voltage in [V]
-  myfile.print(sum/500);
-  Serial.println(sum/500);
+  myfile.print(sum/1000);
+  Serial.println(sum/1000);
   myfile.print(';');
-
-  //Frequency Measurment
-  start = micros();
-  for (i=0;i<6000;i++)
-  {
-   value[i]=analogRead(2);
-  }
-  ending = micros(); 
-  delay(500);
-  checkit();
-  delay(500);
-   
 
   //Write down Frequency in [Hz]
   myfile.print(freq,3);
@@ -108,7 +106,7 @@ void checkit(){
 
   int periods = 0;
   count = 0;
-  for (i=0;i<6000;i++){
+  for (i=0;i<6500;i++){
     int_buffer = value[i];
     
     if (lastvalue >= 1000 && int_buffer >= 1000){
