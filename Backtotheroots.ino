@@ -6,6 +6,9 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
+//#include <LiquidCrystal.h>
+//LiquidCrystal lcd(1, 2, 4, 5, 6, 7);
+
 #include <TimeLib.h>
 #include <Time.h>
 #include <SPI.h>
@@ -19,7 +22,6 @@ int analog = 0;
 float voltage = 0;
 float sum = 0.00;
 float right_voltage = 0.00;
-
 int i=0;
 int count = 0;
 int flag;
@@ -29,17 +31,19 @@ float ending;
 float freq;
 
 void setup() {
-  Serial.begin( 9600 );
+  Serial.begin(9600);
   pinMode(10, OUTPUT);
-  pinMode(0, INPUT);
-  pinMode(3, INPUT);
+  //pinMode(0, INPUT);
+  //pinMode(3, INPUT);
+  
 #if FASTADC
  // set prescale to 4
  sbi(ADCSRA,ADPS2) ;
  cbi(ADCSRA,ADPS1) ;
  cbi(ADCSRA,ADPS0) ;
 #endif
-
+    
+  //lcd.begin(16,2);
   analogReference(INTERNAL); //Spannungsreferenz für die Analogeingänge: 1,1 Volt
   Serial.print("Initializing card...");
   if (!SD.begin(4)) {
@@ -57,7 +61,6 @@ void loop() {
   sum = 0.00;
   for (int i = 0; i < 2000; i++) {
       analog = analogRead(3);
-      //Serial.println(analog);
       voltage = analog/2.1874828; //5.512334 for AR_DEFAULT
       sum = sum + voltage;
   }
@@ -91,15 +94,22 @@ void loop() {
 
   //Write down Frequency in [Hz]
   myfile.print(freq);
-  Serial.println(freq);
+  Serial.println(freq,3);
   myfile.print('\n');
   
 
   // close the file:
   myfile.flush();
   Serial.println("done saving.");
-  delay(400);
-
+  /*
+  lcd.print(" ");
+  lcd.print(right_voltage,2);
+  lcd.print("  ");
+  lcd.print(freq,3);
+  lcd.print(" ");
+  lcd.clear();
+  */
+  delay(7400);
 }
 
 void checkf(){
@@ -122,7 +132,7 @@ void checkf(){
       }
     }
     ending = micros();
-    freq = (100000000.00/(ending - start))-0.043;
+    freq = (100000000.00/(ending - start))-0.044;
 }
 
 
